@@ -1,117 +1,411 @@
-                    @extends('layouts.app') {{-- Using traditional layout --}}
+@extends('layouts.app')
 
-                    @section('content')
-                    <div class="min-h-screen bg-gray-100 p-6">
+@php
+use App\Models\Review;
+use Illuminate\Support\Str;
+@endphp
 
-                        <!-- Header -->
-                        <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-8">
-                            <h1 class="text-3xl font-bold text-blue-700">Welcome, {{ Auth::user()->name }}!</h1>
-                            <div class="mt-4 md:mt-0">
-                                <a href="{{ route('profile.edit') }}" class="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
-                                    Edit Profile
-                                </a>
-                                <a href="{{ route('logout') }}" 
-                                onclick="event.preventDefault(); document.getElementById('logout-form').submit();" 
-                                class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-400 transition ml-2">
-                                    Logout
-                                </a>
-                                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
-                                    @csrf
-                                </form>
-                            </div>
-                        </div>
+@section('content')
 
-                        <!-- Main Dashboard Grid -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+@php
 
-                            <!-- Profile Card -->
-                            <div class="bg-white shadow rounded p-6">
-                                <h2 class="text-xl font-semibold mb-2 text-blue-700">Profile Info</h2>
-                                <p><strong>Name:</strong> {{ Auth::user()->name }}</p>
-                                <p><strong>Email:</strong> {{ Auth::user()->email }}</p>
-                                <p><strong>Role:</strong> {{ ucfirst(Auth::user()->role) }}</p>
-                                @if(Auth::user()->role === 'provider')
-                                    <p><strong>Service:</strong> {{ ucfirst(str_replace('_',' ', Auth::user()->service_type)) ?? 'N/A' }}</p>
-                                    <p><strong>Availability:</strong> 
-                                        @if(Auth::user()->is_available)
-                                            <span class="text-green-600 font-bold">Available</span>
-                                        @else
-                                            <span class="text-red-600 font-bold">Not Available</span>
-                                        @endif
-                                    </p>
-                                @endif
-                            </div>
+    // 🚨 PENALTY STATUS
+    $penalty = auth()->user()->penalty ?? 0;
 
-                            <!-- Quick Actions Card -->
-                            <div class="bg-white shadow rounded p-6">
-                                <h2 class="text-xl font-semibold mb-4 text-blue-700">Quick Action</h2>
-                                @if(Auth::user()->role === 'provider')
-                                    <a href="#" class="block mb-3 bg-yellow-400 text-blue-800 px-4 py-2 rounded hover:bg-yellow-300 hover:text-blue-900 text-center transition">
-                                        View Bookings
-                                    </a>
-                                    <a href="#" class="block mb-3 bg-green-400 text-white px-4 py-2 rounded hover:bg-green-300 text-center transition">
-                                        Manage Services
-                                    </a>
-                                    <form method="POST" action="{{ route('provider.update') }}">
-                                        @csrf
-                                        <button class="block w-full bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
-                                            Toggle Availability
-                                        </button>
-                                    </form>
-                                @else
-                                    <a href="{{ route('find.providers') }}" class="block mb-3 bg-yellow-400 text-blue-800 px-4 py-2 rounded hover:bg-yellow-300 hover:text-blue-900 text-center transition">
-                                        Find Pet Sitters
-                                    </a>
-                                    <a href="{{ route('bookings.index') }}" class="block mb-3 bg-green-400 text-white px-4 py-2 rounded hover:bg-green-300 text-center transition">
-                                        View Bookings
-                                    </a>
-                                @endif
-                            </div>
+    if ($penalty == 1) {
 
-                            <!-- Contact / Stats Card -->
-                            <div class="bg-white shadow rounded p-6">
-                                <h2 class="text-xl font-semibold mb-4 text-blue-700">Contact & Stats</h2>
-                                @if(Auth::user()->role === 'provider')
-                                    <p>Total Bookings: 0</p>
-                                    <p>Average Rating: N/A</p>
-                                    <p>Contact: provider@example.com</p>
-                                @else
-                                    <p>Saved Providers: 0</p>
-                                    <p>Upcoming Bookings: 0</p>
-                                    <p>Support Contact: support@pawpal.com</p>
-                                @endif
-                            </div>
+        $title = 'Warning';
+        $icon = '⚠️';
+        $bg = 'bg-yellow-500/10 border-yellow-400/30';
+        $text = 'text-yellow-300';
+        $message = 'Your account received a warning.';
 
-                        </div>
+    }
 
-                        <!-- Optional Providers Grid (for Pet Owners) -->
-                        @if(Auth::user()->role === 'user')
-                            <div class="mt-8">
-                                <h2 class="text-2xl font-bold text-blue-700 mb-4">Available Pet Sitters</h2>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    @forelse($providers ?? [] as $provider)
-                                    <div class="bg-white shadow rounded p-4 flex flex-col">
-                                        <div class="flex items-center mb-3">
-                                            <img src="{{ $provider->avatar ?? 'https://via.placeholder.com/80' }}" alt="Avatar" class="rounded-full w-16 h-16 mr-3">
-                                            <div>
-                                                <h3 class="text-lg font-semibold text-blue-700">{{ $provider->name }}</h3>
-                                                <p class="text-blue-500">{{ ucfirst(str_replace('_',' ', $provider->service_type)) }}</p>
-                                            </div>
-                                            @if($provider->is_available)
-                                            <span class="ml-auto bg-green-100 text-green-700 px-2 py-1 rounded text-sm">Available Now</span>
-                                            @endif
-                                        </div>
-                                        <p class="text-gray-600 flex-grow">{{ $provider->bio ?? 'No bio available.' }}</p>
-                                        <button class="mt-3 bg-yellow-400 text-blue-800 px-4 py-2 rounded hover:bg-yellow-300 hover:text-blue-900 transition">
-                                            Contact
-                                        </button>
-                                    </div>
-                                    @empty
-                                        <p class="text-gray-600">No providers available at the moment.</p>
-                                    @endforelse
-                                </div>
-                            </div>
-                        @endif
+    elseif ($penalty == 2) {
+
+        $title = 'Final Warning';
+        $icon = '🚨';
+        $bg = 'bg-red-500/10 border-red-400/30';
+        $text = 'text-red-300';
+        $message = 'Your account is close to suspension.';
+
+    }
+
+    elseif ($penalty >= 3) {
+
+        $title = 'Restricted';
+        $icon = '⛔';
+        $bg = 'bg-gray-500/10 border-gray-400/30';
+        $text = 'text-gray-300';
+        $message = 'Your account has been restricted.';
+
+    }
+
+@endphp
+
+<div id="dashboard"
+     class="min-h-screen bg-gradient-to-br from-gray-950 via-slate-900 to-black text-white p-6 transition-all duration-500">
+
+    <!-- 🚨 WARNING -->
+    @if($penalty > 0)
+
+    <div class="mb-6 border rounded-3xl p-4 backdrop-blur-xl shadow-lg {{ $bg }}">
+
+        <div class="flex items-center gap-4">
+
+            <div class="text-3xl">
+                {{ $icon }}
+            </div>
+
+            <div>
+
+                <p class="font-bold text-lg {{ $text }}">
+                    {{ $title }}
+                </p>
+
+                <p class="text-sm text-gray-300">
+                    {{ $message }}
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    @endif
+
+    <!-- 🔝 HEADER -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+
+        <div>
+
+            <h1 class="text-4xl font-bold">
+                Welcome, {{ Auth::user()->name }} 👋
+            </h1>
+
+            <p class="text-gray-400 mt-1">
+                Dashboard overview
+            </p>
+
+        </div>
+
+        <div class="flex items-center gap-3 mt-4 md:mt-0">
+
+            <!-- 🌙 TOGGLE -->
+            <button id="theme-toggle"
+                class="bg-white/10 backdrop-blur-xl border border-white/10
+                       px-4 py-3 rounded-2xl hover:bg-white/20 transition">
+
+                🌙
+
+            </button>
+
+            <!-- ✏️ -->
+            <a href="{{ route('profile.edit') }}"
+               class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-3 rounded-2xl font-semibold shadow-lg transition">
+                ✏️ Edit
+            </a>
+
+            <!-- 🚪 -->
+            <a href="{{ route('logout') }}"
+               onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+               class="bg-red-500 hover:bg-red-600 text-white px-5 py-3 rounded-2xl font-semibold shadow-lg transition">
+                Logout
+            </a>
+
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
+                @csrf
+            </form>
+
+        </div>
+
+    </div>
+
+    <!-- SUCCESS -->
+    @if(session('success'))
+
+    <div class="mb-6 bg-green-500/10 border border-green-400/30 text-green-300 px-5 py-4 rounded-2xl shadow-lg">
+
+        {{ session('success') }}
+
+    </div>
+
+    @endif
+
+    <!-- 📊 TOP CARDS -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
+        <!-- 💳 WALLET -->
+        <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-xl">
+
+            <p class="text-gray-400 text-sm">
+                Wallet Balance
+            </p>
+
+            <h2 class="text-4xl font-bold text-green-400 mt-3">
+                ₱{{ number_format(Auth::user()->wallet_balance, 2) }}
+            </h2>
+
+            <a href="{{ route('wallet.page') }}"
+               class="mt-5 block text-center bg-indigo-600 hover:bg-indigo-500 py-3 rounded-2xl font-semibold transition">
+                + Add Funds
+            </a>
+
+        </div>
+
+        <!-- 👤 PROFILE -->
+        <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-xl">
+
+            <h2 class="text-xl font-bold mb-5">
+                👤 Profile
+            </h2>
+
+            <div class="space-y-3 text-sm text-gray-300">
+
+                <p>
+                    <span class="text-gray-500">Name:</span>
+                    {{ Auth::user()->name }}
+                </p>
+
+                <p>
+                    <span class="text-gray-500">Email:</span>
+                    {{ Auth::user()->email }}
+                </p>
+
+                <p>
+                    <span class="text-gray-500">Role:</span>
+                    {{ ucfirst(Auth::user()->role) }}
+                </p>
+
+            </div>
+
+        </div>
+
+        <!-- ⚡ QUICK ACTIONS -->
+        <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-xl">
+
+            <h2 class="text-xl font-bold mb-5">
+                ⚡ Quick Actions
+            </h2>
+
+            <div class="grid gap-4">
+
+                <a href="{{ route('find.providers', ['type' => 'sitter']) }}"
+                   class="bg-yellow-400 hover:bg-yellow-500 text-black py-3 rounded-2xl text-center font-semibold transition">
+                    🐾 Find Sitters
+                </a>
+
+                <a href="{{ route('find.providers', ['type' => 'walker']) }}"
+                   class="bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-2xl text-center font-semibold transition">
+                    🐕 Find Walkers
+                </a>
+
+                <a href="{{ route('bookings.index') }}"
+                   class="bg-green-500 hover:bg-green-600 text-white py-3 rounded-2xl text-center font-semibold transition">
+                    📅 My Bookings
+                </a>
+
+                <a href="{{ route('chat.inbox') }}"
+                   class="bg-purple-500 hover:bg-purple-600 text-white py-3 rounded-2xl text-center font-semibold transition">
+                    💬 Messages
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- 🐾 PROVIDERS -->
+    @if(Auth::user()->role === 'user')
+
+    <div class="mt-10">
+
+        <div class="flex items-center justify-between mb-6">
+
+            <h2 class="text-3xl font-bold">
+                Available Providers 🐾
+            </h2>
+
+            <p class="text-sm text-gray-400">
+                Find trusted sitters & walkers
+            </p>
+
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+            @forelse($providers ?? [] as $provider)
+
+            @php
+                $reviews = Review::where('provider_id', $provider->id)->get();
+                $count = $reviews->count();
+                $avg = $count > 0 ? round($reviews->avg('rating'), 1) : 0;
+            @endphp
+
+            <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-5 shadow-xl hover:scale-[1.02] transition">
+
+                <div class="flex items-start justify-between">
+
+                    <div>
+
+                        <h3 class="text-xl font-bold">
+                            {{ $provider->name }}
+                        </h3>
+
+                        <p class="text-sm text-gray-400">
+                            {{ ucfirst($provider->service_type) }}
+                        </p>
 
                     </div>
-                    @endsection
+
+                    @if($provider->is_available)
+
+                        <span class="bg-green-500/20 text-green-300 text-xs px-3 py-1 rounded-full">
+                            🟢 Online
+                        </span>
+
+                    @else
+
+                        <span class="bg-gray-500/20 text-gray-300 text-xs px-3 py-1 rounded-full">
+                            ⚪ Offline
+                        </span>
+
+                    @endif
+
+                </div>
+
+                <!-- ⭐ REVIEWS -->
+                <div class="mt-4">
+
+                    <div class="text-yellow-400 text-lg">
+
+                        @for($i = 1; $i <= 5; $i++)
+
+                            {{ $i <= floor($avg) ? '⭐' : '☆' }}
+
+                        @endfor
+
+                    </div>
+
+                    <p class="text-sm text-gray-400 mt-1">
+
+                        @if($count > 0)
+
+                            {{ $avg }}/5
+                            ({{ $count }} {{ Str::plural('review', $count) }})
+
+                        @else
+
+                            No reviews yet
+
+                        @endif
+
+                    </p>
+
+                </div>
+
+                <!-- BUTTON -->
+                <a href="{{ route('chat.index', $provider->id) }}"
+                   class="mt-5 block bg-indigo-600 hover:bg-indigo-500 py-3 rounded-2xl text-center font-semibold transition">
+                    Message 💬
+                </a>
+
+            </div>
+
+            @empty
+
+                <p class="text-gray-500">
+                    No providers available.
+                </p>
+
+            @endforelse
+
+        </div>
+
+    </div>
+
+    @endif
+
+</div>
+
+<!-- 🌙 DARK/LIGHT MODE -->
+<script>
+
+const toggleBtn = document.getElementById('theme-toggle');
+const dashboard = document.getElementById('dashboard');
+
+// ☀️ LOAD SAVED
+if (localStorage.getItem('user-theme') === 'light') {
+
+    dashboard.classList.remove(
+        'from-gray-950',
+        'via-slate-900',
+        'to-black',
+        'text-white'
+    );
+
+    dashboard.classList.add(
+        'from-indigo-50',
+        'via-purple-50',
+        'to-pink-50',
+        'text-gray-900'
+    );
+
+    toggleBtn.innerHTML = '☀️';
+}
+
+// 🔄 TOGGLE
+toggleBtn.addEventListener('click', () => {
+
+    if (dashboard.classList.contains('from-gray-950')) {
+
+        // ☀️ LIGHT
+        dashboard.classList.remove(
+            'from-gray-950',
+            'via-slate-900',
+            'to-black',
+            'text-white'
+        );
+
+        dashboard.classList.add(
+            'from-indigo-50',
+            'via-purple-50',
+            'to-pink-50',
+            'text-gray-900'
+        );
+
+        toggleBtn.innerHTML = '☀️';
+
+        localStorage.setItem('user-theme', 'light');
+
+    } else {
+
+        // 🌙 DARK
+        dashboard.classList.remove(
+            'from-indigo-50',
+            'via-purple-50',
+            'to-pink-50',
+            'text-gray-900'
+        );
+
+        dashboard.classList.add(
+            'from-gray-950',
+            'via-slate-900',
+            'to-black',
+            'text-white'
+        );
+
+        toggleBtn.innerHTML = '🌙';
+
+        localStorage.setItem('user-theme', 'dark');
+
+    }
+
+});
+
+</script>
+
+@endsection

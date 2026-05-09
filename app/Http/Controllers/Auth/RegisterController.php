@@ -13,41 +13,46 @@ class RegisterController extends Controller
 {
     use RegistersUsers;
 
-    public function __construct()
-    {
-        $this->middleware('guest');
-    }
-
-    // VALIDATION
     protected function validator(array $data)
-    {
-        return Validator::make($data, [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-        ]);
-    }
+{
+    // 🔥 Normalize role BEFORE validating
+    $data['role'] = isset($data['role']) && in_array($data['role'], ['user', 'provider'])
+        ? $data['role']
+        : 'user';
 
-    // CREATE USER
+    return \Validator::make($data, [
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users',
+        'password' => 'required|min:8|confirmed',
+
+        'role' => 'required|in:user,provider',
+        'service_type' => 'required_if:role,provider|in:sitter,walker',
+    ]);
+}
+
     protected function create(array $data)
-    {
-        return User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
+{
+    // same normalization here (safe)
+    $role = (isset($data['role']) && in_array($data['role'], ['user','provider']))
+        ? $data['role']
+        : 'user';
 
-            // 🔥 AUTO ROLE
-            'role' => !empty($data['service_type']) ? 'provider' : 'user',
+    $isProvider = $role === 'provider';
 
-            'service_type' => $data['service_type'] ?? null,
-        ]);
-    }
+    return \App\Models\User::create([
+        'name' => $data['name'],
+        'email' => $data['email'],
+        'password' => \Hash::make($data['password']),
 
-    // 🔥 ROLE-BASED REDIRECT AFTER REGISTER
+        'role' => $role,
+        'service_type' => $isProvider ? $data['service_type'] : null,
+        'status' => $isProvider ? 'pending' : 'approved',
+    ]);
+}
     protected function registered(Request $request, $user)
     {
         if ($user->role === 'provider') {
-            return redirect('/provider/dashboard');
+            return redirect('/pending-approval');
         }
 
         return redirect('/dashboard');

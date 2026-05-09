@@ -1,33 +1,71 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+namespace App\Http\Controllers\Auth;
 
-return new class extends Migration
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+
+class RegisteredUserController extends Controller
 {
-    public function up(): void
+    // 📄 SHOW REGISTER PAGE
+    public function create()
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-
-            $table->string('role')->default('user'); // user or provider
-            $table->string('service_type')->nullable(); // pet_sitting, dog_walking
-            $table->string('bio')->nullable();
-            $table->string('location')->nullable();
-            $table->boolean('is_available')->default(false);
-
-            $table->rememberToken();
-            $table->timestamps();
-        });
+        return view('auth.register');
     }
 
-    public function down(): void
+    // 🚀 REGISTER USER
+    public function store(Request $request)
     {
-        Schema::dropIfExists('users');
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'unique:users'],
+            'password' => ['required', 'min:6', 'confirmed'],
+
+            // ROLE
+            'role' => ['required', 'in:user,provider'],
+
+            // SERVICE TYPE (ONLY PROVIDER)
+            'service_type' => ['required_if:role,provider', 'in:sitter,walker'],
+
+            // 🔥 CERTIFICATE (ONLY PROVIDER)
+            'certificate' => ['required_if:role,provider', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
+        ]);
+
+        $isProvider = $request->role === 'provider';
+
+        // 📸 HANDLE FILE UPLOAD
+        $certificatePath = null;
+
+        if ($request->hasFile('certificate')) {
+            $certificatePath = $request->file('certificate')
+                ->store('certificates', 'public');
+        }
+
+        // 💾 CREATE USER
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+
+            'role' => $request->role,
+            'service_type' => $isProvider ? $request->service_type : null,
+            'status' => $isProvider ? 'pending' : 'approved',
+
+            // 🔥 SAVE FILE PATH
+            'certificate' => $certificatePath,
+        ]);
+
+        // 🚫 PROVIDER → WAIT APPROVAL
+        if ($isProvider) {
+            return redirect()->route('approval.pending');
+        }
+
+        // ✅ NORMAL USER LOGIN
+        Auth::login($user);
+
+        return redirect('/dashboard');
     }
-};
+}

@@ -18,15 +18,22 @@ class User extends Authenticatable
      * @var array<int, string>
      */
    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'role',
-        'service_type',
-        'bio',
-        'location',
-        'is_available',
-    ];
+    'name',
+    'email',
+    'password',
+    'role',
+    'service_type',
+    'bio',
+    'location',
+    'is_available',
+    'status',
+    'warnings',
+    'penalty',
+
+    // 🔥 ADD THIS
+    'certificate'
+    
+];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -48,4 +55,17 @@ class User extends Authenticatable
         'is_available' => 'boolean',
         'password' => 'hashed',
     ];
+
+    public function isAdmin(): bool
+{
+    return $this->role === 'admin';
+}
+public function isSitter()
+{
+    return $this->role === 'sitter';
+}
+public function notifications()
+{
+    return $this->hasMany(Notification::class);
+}
 }

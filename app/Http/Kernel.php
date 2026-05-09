@@ -15,12 +15,21 @@ class Kernel extends HttpKernel
      */
     protected $middleware = [
         // \App\Http\Middleware\TrustHosts::class,
+        
         \App\Http\Middleware\TrustProxies::class,
         \Illuminate\Http\Middleware\HandleCors::class,
         \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+    ];
+     protected $routeMiddleware = [
+        'approved' => \App\Http\Middleware\EnsureProviderApproved::class,
+        'auth' => \App\Http\Middleware\Authenticate::class,
+    'role' => \App\Http\Middleware\CheckRole::class,
+    'service' => \App\Http\Middleware\CheckServiceType::class, 
+    'not_banned' => \App\Http\Middleware\CheckIfBanned::class,
+    'admin' => \App\Http\Middleware\AdminMiddleware::class,// ✅ ADD THIS
     ];
 
     /**
@@ -36,6 +45,7 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\UpdateLastSeen::class,
         ],
 
         'api' => [
@@ -66,4 +76,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'role' => \App\Http\Middleware\CheckRole::class,
     ];
+
+    
 }

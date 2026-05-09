@@ -14,25 +14,25 @@ class ServiceController extends Controller
         $provider = Auth::user();
         $services = Service::where('provider_id', $provider->id)->get();
 
-        return view('services.index', compact('services', 'provider'));
+        return view('provider.services', compact('services', 'provider'));
     }
 
     // Add a new service
     public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-        ]);
+{
+    $request->validate([
+        'title' => 'required|string|max:255',
+        'price' => 'required|numeric|min:0',
+    ]);
 
-        Service::create([
-            'provider_id' => Auth::id(),
-            'name' => $request->name,
-            'price' => $request->price,
-        ]);
+    Service::create([
+        'provider_id' => Auth::id(),
+        'title' => $request->title,
+        'price' => $request->price,
+    ]);
 
-        return back()->with('success', 'Service added successfully!');
-    }
+    return back()->with('success', 'Service added successfully!');
+}
 
     // Delete a service
     public function destroy($id)

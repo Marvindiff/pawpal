@@ -11,11 +11,39 @@ class Booking extends Model
         'user_id',
         'provider_id',
         'date',
-        'status'
+        'owner_id',
+        'sitter_id',
+        'schedule',
+        'status',
+        'price',
+        'provider_id',
+        'is_refunded',
+    'reject_reason',
+    'payment_method',
+    'payment_status',
+    'gcash_proof',
+    'payment_verified_at',
+        
     ];
-
+  public function owner()
+    {
+        return $this->belongsTo(User::class, 'owner_id');
+    }
+public function provider()
+{
+    return $this->belongsTo(\App\Models\User::class, 'provider_id');
+}
+public function service()
+{
+    return $this->belongsTo(\App\Models\Service::class);
+}
+    public function sitter()
+    {
+        return $this->belongsTo(User::class, 'sitter_id');
+    }
+    
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

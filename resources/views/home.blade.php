@@ -34,6 +34,24 @@
                 @if($provider->is_available)
                 <span class="ml-auto bg-green-100 text-green-700 px-2 py-1 rounded text-sm">Available Now</span>
                 @endif
+                <!-- ⭐ RATING -->
+<div class="mt-2">
+
+    <div class="flex items-center text-yellow-400 text-sm">
+        @for($i = 1; $i <= 5; $i++)
+            @if($i <= floor($provider->average_rating))
+                ⭐
+            @else
+                ☆
+            @endif
+        @endfor
+    </div>
+
+    <p class="text-xs text-gray-500">
+        {{ $provider->average_rating }} / 5 ({{ $provider->total_reviews }} reviews)
+    </p>
+
+</div>
             </div>
             <p class="text-gray-600 flex-grow">{{ $provider->bio ?? 'No bio available.' }}</p>
         </div>

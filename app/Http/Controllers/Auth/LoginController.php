@@ -13,16 +13,28 @@ class LoginController extends Controller
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
-        $this->middleware('auth')->only('logout');
     }
 
-    // 🔥 ROLE-BASED REDIRECT AFTER LOGIN
-    protected function authenticated(Request $request, $user)
+    // ✅ CLEAN ROLE REDIRECT (ONLY ONE SOURCE OF TRUTH)
+    protected function redirectTo()
     {
-        if ($user->role === 'provider') {
-            return redirect('/provider/dashboard');
+        $user = auth()->user();
+
+        if (!$user) {
+            return '/login';
         }
 
-        return redirect('/dashboard');
+        if ($user->role === 'provider') {
+            return '/provider/dashboard';
+        }
+
+        if ($user->role === 'admin') {
+            return '/admin/sitter-verifications';
+        }
+        if ($user->role === 'walker') {
+            return '/walker/dashboard';
+        }
+
+        return '/dashboard';
     }
 }
