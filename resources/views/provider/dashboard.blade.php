@@ -278,8 +278,17 @@
                     💬 Messages
                 </a>
 
-                <form method="POST" action="{{ route('provider.toggleAvailability') }}">
-                    @csrf
+               <form method="POST"
+      action="{{ route('provider.toggleAvailability') }}">
+
+    @csrf
+
+    <!-- 🔥 SEND VALUE -->
+    <input type="hidden"
+           name="is_available"
+           value="{{ auth()->user()->is_available ? 0 : 1 }}">
+
+    
 
                     <button
                         class="w-full py-3 rounded-2xl font-semibold transition

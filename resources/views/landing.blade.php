@@ -141,12 +141,12 @@
 
                 @else
 
-                <a href="{{ route('dashboard') }}"
-                   class="bg-gradient-to-r from-indigo-500 to-purple-500 hover:scale-105 transition px-5 py-2.5 rounded-2xl font-semibold shadow-xl">
+                <a href="/dashboard-redirect"
+   class="bg-gradient-to-r from-indigo-500 to-purple-500 hover:scale-105 transition px-5 py-2.5 rounded-2xl font-semibold shadow-xl">
 
-                    Dashboard
+    Dashboard
 
-                </a>
+</a>
 
                 @endguest
 

@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use App\Models\Booking;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProviderController;
 use App\Http\Controllers\BookingController;
@@ -20,6 +20,30 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\TrackingController;
+
+Route::get('/wallet/add', [WalletController::class, 'showAddFunds'])
+    ->name('wallet.add.form');
+
+Route::post('/wallet/add', [WalletController::class, 'addFunds'])
+    ->name('wallet.add');
+
+Route::get('/providers', [App\Http\Controllers\ProviderController::class, 'index'])
+    ->name('providers.index');
+
+
+Route::get('/booking-location/{id}', [TrackingController::class, 'getLocation']);
+
+Route::get('/receipt/{id}', function ($id) {
+
+    $booking = Booking::with(['user', 'provider'])->findOrFail($id);
+
+    return view('booking.receipt', compact('booking'));
+
+})->name('receipt.show');
+
+Route::post('/update-location', [TrackingController::class, 'update']);
+
 
 Route::get('/payment-status/{id}', [App\Http\Controllers\PaymentController::class, 'checkStatus']);
 
@@ -100,7 +124,7 @@ Route::post('/report', [ReportController::class, 'store'])
 
 Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
 
-Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
+
 
 Route::get('/review/{booking}', [ReviewController::class, 'create'])
     ->name('review.create');
@@ -260,7 +284,44 @@ Route::middleware(['auth', 'not_banned'])->group(function () {
 
     // Prevent GET reply
     Route::get('/admin/messages/reply', fn() => redirect('/admin/messages'));
+/*
+|--------------------------------------------------------------------------
+| DASHBOARD REDIRECT
+|--------------------------------------------------------------------------
+*/
 
+Route::get('/dashboard-redirect', function () {
+
+    $user = auth()->user();
+
+    // 👤 USER
+    if ($user->role === 'user') {
+        return redirect()->route('dashboard');
+    }
+
+    // 🐾 PROVIDER
+    if ($user->role === 'provider') {
+
+        // 🚶 WALKER
+        if ($user->service_type === 'walker') {
+            return redirect()->route('walker.dashboard');
+        }
+
+        // 🐾 SITTER
+        if ($user->service_type === 'sitter') {
+            return redirect()->route('provider.dashboard');
+        }
+
+    }
+
+    // 🧑‍💼 ADMIN
+    if ($user->role === 'admin') {
+        return redirect()->route('admin.dashboard');
+    }
+
+})->middleware('auth');
+
+/*
     /*
     |--------------------------------------------------------------------------
     | CHAT
@@ -271,7 +332,7 @@ Route::middleware(['auth', 'not_banned'])->group(function () {
     Route::get('/chat/{userId}', [ChatController::class, 'index'])->name('chat.index');
     Route::post('/chat/send', [ChatController::class, 'send'])->name('chat.send');
     Route::post('/chat/typing', [ChatController::class, 'typing'])->name('chat.typing');
-
+    
     /*
     |--------------------------------------------------------------------------
     | USER

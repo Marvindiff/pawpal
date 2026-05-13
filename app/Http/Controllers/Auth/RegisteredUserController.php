@@ -29,6 +29,8 @@ class RegisteredUserController extends Controller
 
             // SERVICE TYPE (ONLY PROVIDER)
             'service_type' => ['required_if:role,provider', 'in:sitter,walker'],
+            'mobile_number' => ['required', 'string', 'max:20'],
+            'location' => ['nullable', 'string', 'max:255'],
 
             // 🔥 CERTIFICATE (ONLY PROVIDER)
             'certificate' => ['required_if:role,provider', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
@@ -53,6 +55,8 @@ class RegisteredUserController extends Controller
             'role' => $request->role,
             'service_type' => $isProvider ? $request->service_type : null,
             'status' => $isProvider ? 'pending' : 'approved',
+            'mobile_number' => $request->mobile_number,
+            'location' => $request->location,
 
             // 🔥 SAVE FILE PATH
             'certificate' => $certificatePath,

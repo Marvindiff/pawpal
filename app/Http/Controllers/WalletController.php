@@ -10,31 +10,46 @@ use App\Models\Booking;
 class WalletController extends Controller
 {
     // 💰 ADD FUNDS (ADMIN ONLY)
-    public function addFunds(Request $request, $user_id)
-    {
-        if (auth()->user()->role !== 'admin') {
-            abort(403);
-        }
+    // 💰 ADD FUNDS
+public function addFunds(Request $request)
+{
+    $request->validate([
 
-        $request->validate([
-            'amount' => 'required|numeric|min:1'
-        ]);
+        'amount' => 'required|numeric|min:1',
 
-        $user = User::findOrFail($user_id);
+        'payment_method' => 'required'
 
-        $user->wallet_balance += $request->amount;
-        $user->save();
+    ]);
 
-        WalletTransaction::create([
-            'user_id' => $user->id,
-            'amount' => $request->amount,
-            'type' => 'credit',
-            'description' => 'Admin added funds'
-        ]);
+    $user = auth()->user();
 
-        return redirect('/dashboard')->with('success', 'Funds added successfully!');
-    }
+    // 💰 ADD BALANCE
+    $user->wallet_balance += $request->amount;
 
+    $user->save();
+
+    // 🧾 TRANSACTION LOG
+    WalletTransaction::create([
+
+        'user_id' => $user->id,
+
+        'amount' => $request->amount,
+
+        'type' => 'credit',
+
+        'description' =>
+            'Wallet top-up using ' .
+            strtoupper($request->payment_method)
+
+    ]);
+
+    return redirect()
+        ->route('dashboard')
+        ->with(
+            'success',
+            'Funds added successfully!'
+        );
+}
     // 💸 PAY USING WALLET
     public function payWithWallet($booking_id)
     {

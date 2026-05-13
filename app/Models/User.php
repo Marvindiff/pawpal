@@ -31,7 +31,9 @@ class User extends Authenticatable
     'penalty',
 
     // 🔥 ADD THIS
-    'certificate'
+    'certificate',
+    'mobile_number'
+
     
 ];
 

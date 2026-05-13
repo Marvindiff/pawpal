@@ -3,7 +3,7 @@
 @section('content')
 
 <div id="dashboard"
-     class="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-6 transition-all duration-500">
+     class="min-h-screen w-full bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-6 transition-all duration-500">
 
     <!-- 🔝 HEADER -->
     <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
@@ -11,38 +11,38 @@
         <div>
 
             <h1 class="text-4xl font-bold text-indigo-700">
-                📅 Client Bookings
+                🐾 Sitter Bookings
             </h1>
 
             <p class="text-gray-500 mt-1">
-                Manage and review your client bookings
+                Manage your bookings and schedules
             </p>
 
         </div>
 
         <div class="flex items-center gap-3">
 
-            <!-- 🌙 THEME -->
+            <!-- 🌙 TOGGLE -->
             <button id="theme-toggle"
-                class="bg-white shadow-lg px-4 py-3 rounded-2xl hover:bg-gray-100 transition">
+                class="bg-white shadow px-4 py-3 rounded-2xl hover:bg-gray-100 transition">
 
                 🌙
 
             </button>
 
             <!-- 🔙 BACK -->
-            <a href="{{ route('provider.dashboard') }}"
-               class="bg-indigo-600 text-white px-5 py-3 rounded-2xl shadow-lg hover:bg-indigo-500 transition font-semibold">
+            <button onclick="history.back()"
+                class="bg-gray-800 text-white px-5 py-3 rounded-2xl hover:bg-gray-700 transition font-semibold shadow-lg">
 
-                ← Dashboard
+                ← Back
 
-            </a>
+            </button>
 
         </div>
 
     </div>
 
-    <!-- 🔍 SORT -->
+    <!-- 🔍 SORT BAR -->
     <div class="flex flex-wrap gap-3 mb-8">
 
         <button onclick="sortBookings('newest')"
@@ -66,139 +66,119 @@
 
         </button>
 
-        <button onclick="sortBookings('paid')"
+        <button onclick="sortBookings('completed')"
             class="bg-green-600 text-white px-5 py-3 rounded-2xl font-semibold shadow hover:bg-green-500 transition">
 
-            💳 Paid
+            ✅ Completed
 
         </button>
 
     </div>
 
-    <!-- 📦 BOOKINGS -->
-    <div id="bookingContainer"
-         class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+ 
+<!-- 📦 BOOKINGS -->
+<div id="bookingContainer"
+     class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-7xl mx-auto px-2">
 
         @forelse($bookings as $booking)
 
-        <div class="booking-card bg-white rounded-3xl shadow-lg p-6 hover:shadow-2xl hover:-translate-y-1 transition duration-300"
+        <!-- CLICKABLE CARD -->
+        <a href="{{ route('booking.show', $booking->id) }}"
+   class="block">
 
-             data-date="{{ $booking->created_at }}"
-             data-status="{{ $booking->status }}"
-             data-payment="{{ $booking->payment_status }}">
+            <div class="booking-card bg-white rounded-3xl shadow-lg p-6 hover:shadow-2xl hover:-translate-y-1 transition duration-300 cursor-pointer"
 
-            <!-- TOP -->
-            <div class="flex justify-between items-start mb-5">
+                 data-date="{{ $booking->created_at }}"
+                 data-status="{{ $booking->status }}">
 
-                <!-- LEFT -->
-                <a href="{{ route('booking.show', $booking->id) }}"
-                   class="flex-1">
+                <!-- TOP -->
+                <div class="flex justify-between items-start gap-4 mb-5">
 
-                    <h2 class="text-xl font-bold text-gray-800">
-                        👤 {{ $booking->user->name ?? 'Customer' }}
-                    </h2>
+                    <!-- USER -->
+                    <div>
 
-                    <p class="text-sm text-gray-500 mt-1">
-                        🐾 Pet Service
-                    </p>
+                        <h2 class="text-xl font-bold text-gray-800">
+                            {{ $booking->user->name }}
+                        </h2>
 
-                    <p class="text-sm text-gray-500 mt-1">
-                        📅 {{ $booking->schedule ?? 'No schedule' }}
-                    </p>
+                        <p class="text-indigo-600 font-semibold mt-2">
 
-                </a>
+    📱 {{ $booking->user->mobile_number ?? 'No mobile number' }}
 
-                <!-- RIGHT -->
-                <div class="text-right">
+</p>
+                        <p class="text-sm text-gray-500 mt-1">
+                            📅 {{ $booking->schedule }}
+                        </p>
 
-                    <p class="text-2xl font-bold text-indigo-600">
-                        ₱{{ number_format($booking->price, 2) }}
-                    </p>
+                        <p class="text-green-600 font-bold mt-2">
+                            💰 ₱{{ number_format($booking->price ?? 100, 2) }}
+                        </p>
+
+                    </div>
+
+                    <!-- STATUS -->
+                    <div class="flex flex-col items-end gap-2">
+
+                        <span class="px-4 py-1 rounded-full text-xs font-bold
+
+                            @if($booking->status == 'pending')
+                                bg-yellow-100 text-yellow-700
+
+                            @elseif($booking->status == 'approved')
+                                bg-green-100 text-green-700
+
+                            @elseif($booking->status == 'completed')
+                                bg-blue-100 text-blue-700
+
+                            @elseif($booking->status == 'paid')
+                                bg-purple-100 text-purple-700
+
+                            @else
+                                bg-red-100 text-red-700
+                            @endif">
+
+                            {{ ucfirst(str_replace('_', ' ', $booking->status)) }}
+
+                        </span>
+
+                        <!-- PAYMENT -->
+                        @if($booking->payment_status == 'paid' || $booking->status == 'paid')
+
+                            <span class="text-green-600 text-xs font-bold">
+                                💳 Paid
+                            </span>
+
+                        @endif
+
+                        <!-- REFUND -->
+                        @if($booking->payment_status == 'refunded')
+
+                            <span class="text-blue-600 text-xs font-bold">
+                                💸 Refunded
+                            </span>
+
+                        @endif
+
+                    </div>
 
                 </div>
 
-            </div>
-
-            <!-- STATUS -->
-            <div class="flex flex-wrap gap-2 mb-5">
-
-                <!-- BOOKING -->
-                <span class="px-4 py-2 rounded-full text-xs font-bold
-
-                    @if($booking->payment_status == 'paid')
-                        bg-green-100 text-green-700
-
-                    @elseif($booking->status == 'approved')
-                        bg-blue-100 text-blue-700
-
-                    @elseif($booking->status == 'pending')
-                        bg-yellow-100 text-yellow-700
-
-                    @elseif($booking->status == 'rejected')
-                        bg-red-100 text-red-700
-
-                    @else
-                        bg-gray-100 text-gray-700
-                    @endif">
-
-                    @if($booking->payment_status == 'paid')
-
-                        💳 Paid
-
-                    @else
-
-                        {{ ucfirst(str_replace('_', ' ', $booking->status)) }}
-
-                    @endif
-
-                </span>
-
-                <!-- MESSAGE -->
-                @if($booking->payment_status == 'paid')
-
-                    <span class="px-4 py-2 rounded-full text-xs font-bold bg-green-100 text-green-700">
-                        ✔ Payment Verified
-                    </span>
-
-                @elseif($booking->status == 'approved')
-
-                    <span class="px-4 py-2 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
-                        ✔ Approved
-                    </span>
-
-                @elseif($booking->status == 'pending')
-
-                    <span class="px-4 py-2 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">
-                        ⏳ Waiting Action
-                    </span>
-
-                @elseif($booking->status == 'rejected')
-
-                    <span class="px-4 py-2 rounded-full text-xs font-bold bg-red-100 text-red-700">
-                        ❌ Rejected
-                    </span>
-
-                @endif
-
-            </div>
-
-            <!-- ACTIONS -->
-            <div class="space-y-4">
-
-                <!-- BUTTON ROW -->
-                <div class="flex flex-wrap gap-3">
+                <!-- ACTIONS -->
+                <div class="flex flex-wrap gap-3 mt-4">
 
                     <!-- APPROVE -->
                     @if($booking->status == 'pending')
 
                         <form method="POST"
                               action="{{ route('walker.walks.approve', $booking->id) }}"
-                              class="flex-1">
+                              onclick="event.stopPropagation()">
 
                             @csrf
 
                             <button
-                                class="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-2xl font-semibold transition shadow">
+                                onclick="event.stopPropagation()"
+
+                                class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-2xl text-sm font-semibold transition shadow">
 
                                 ✅ Approve
 
@@ -208,17 +188,44 @@
 
                     @endif
 
-                    <!-- COMPLETE -->
-                    @if($booking->status == 'approved' && $booking->payment_status == 'paid')
+                    <!-- REJECT -->
+                    @if($booking->status == 'pending' || $booking->status == 'approved')
 
                         <form method="POST"
-                              action="{{ route('walker.walks.complete', $booking->id) }}"
-                              class="flex-1">
+                              action="{{ route('walker.walks.reject', $booking->id) }}"
+                              onclick="event.stopPropagation()">
 
                             @csrf
 
                             <button
-                                class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-2xl font-semibold transition shadow">
+                                onclick="event.stopPropagation(); return confirm('Reject this booking?')"
+
+                                class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-2xl text-sm font-semibold transition shadow">
+
+                                ❌ Reject
+
+                            </button>
+
+                        </form>
+
+                    @endif
+
+                    <!-- COMPLETE -->
+                    @if(
+                        ($booking->status == 'approved' && $booking->payment_status == 'paid')
+                        || $booking->status == 'paid'
+                    )
+
+                        <form method="POST"
+                              action="{{ route('walker.walks.complete', $booking->id) }}"
+                              onclick="event.stopPropagation()">
+
+                            @csrf
+
+                            <button
+                                onclick="event.stopPropagation()"
+
+                                class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-2xl text-sm font-semibold transition shadow">
 
                                 🏁 Complete
 
@@ -230,51 +237,49 @@
 
                 </div>
 
-                <!-- REJECT -->
-                @if($booking->status == 'pending')
+                <!-- PICKUP LOCATION -->
+                @if($booking->customer_latitude && $booking->customer_longitude)
 
-                    <form method="POST"
-                          action="{{ route('walker.walks.reject', $booking->id) }}"
-                          class="space-y-3">
+                <a target="_blank"
+                   href="https://www.google.com/maps?q={{ $booking->customer_latitude }},{{ $booking->customer_longitude }}"
+                   onclick="event.stopPropagation()"
 
-                        @csrf
+                   class="mt-5 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 text-white py-3 rounded-2xl font-semibold transition shadow">
 
-                        <textarea name="reason"
-                            required
-                            placeholder="Reason for rejection..."
-                            class="w-full border border-gray-200 rounded-2xl p-4 text-sm outline-none focus:ring-2 focus:ring-red-400"></textarea>
+                    📍 View Pickup Location
 
-                        <button
-                            onclick="return confirm('Reject this booking?')"
-
-                            class="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-2xl font-semibold transition shadow">
-
-                            ❌ Reject Booking
-
-                        </button>
-
-                    </form>
+                </a>
 
                 @endif
 
+                <!-- MESSAGE -->
+                <a href="{{ route('chat.index', $booking->user_id) }}"
+                   onclick="event.stopPropagation()"
+
+                   class="mt-4 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-2xl font-semibold transition shadow">
+
+                    💬 Message Owner
+
+                </a>
+
             </div>
 
-        </div>
+        </a>
 
         @empty
 
         <div class="col-span-2 text-center py-20">
 
             <div class="text-6xl mb-4">
-                📅
+                🐾
             </div>
 
             <h2 class="text-2xl font-bold text-gray-600">
-                No bookings yet
+                No sitter bookings yet
             </h2>
 
             <p class="text-gray-500 mt-2">
-                Client bookings will appear here.
+                New bookings will appear here.
             </p>
 
         </div>
@@ -323,13 +328,13 @@ function sortBookings(type) {
 
     }
 
-    else if (type === 'paid') {
+    else if (type === 'completed') {
 
         cards.sort((a, b) => {
 
             return (
-                (b.dataset.payment === 'paid') -
-                (a.dataset.payment === 'paid')
+                (b.dataset.status === 'completed') -
+                (a.dataset.status === 'completed')
             );
 
         });
@@ -349,7 +354,7 @@ const toggleBtn = document.getElementById('theme-toggle');
 const dashboard = document.getElementById('dashboard');
 
 // LOAD SAVED
-if (localStorage.getItem('sitter-bookings-theme') === 'dark') {
+if (localStorage.getItem('sitter-theme') === 'dark') {
 
     dashboard.classList.remove(
         'from-indigo-50',
@@ -372,7 +377,6 @@ toggleBtn.addEventListener('click', () => {
 
     if (dashboard.classList.contains('from-gray-950')) {
 
-        // ☀️ LIGHT
         dashboard.classList.remove(
             'from-gray-950',
             'via-slate-900',
@@ -388,11 +392,10 @@ toggleBtn.addEventListener('click', () => {
 
         toggleBtn.innerHTML = '🌙';
 
-        localStorage.setItem('sitter-bookings-theme', 'light');
+        localStorage.setItem('sitter-theme', 'light');
 
     } else {
 
-        // 🌙 DARK
         dashboard.classList.remove(
             'from-indigo-50',
             'via-purple-50',
@@ -408,7 +411,7 @@ toggleBtn.addEventListener('click', () => {
 
         toggleBtn.innerHTML = '☀️';
 
-        localStorage.setItem('sitter-bookings-theme', 'dark');
+        localStorage.setItem('sitter-theme', 'dark');
 
     }
 

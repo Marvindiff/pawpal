@@ -278,7 +278,22 @@
                                required>
 
                     </div>
+<!-- MOBILE NUMBER -->
+<div>
 
+    <label class="text-sm text-gray-300 block mb-2">
+        Mobile Number
+    </label>
+
+    <input type="text"
+           name="mobile_number"
+           value="{{ old('mobile_number') }}"
+           placeholder="09XXXXXXXXX"
+
+           class="w-full bg-white/10 border border-white/10 text-white placeholder-gray-400 px-5 py-4 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-400 transition"
+           required>
+
+</div>
                     <!-- ROLE -->
                     <div>
 
@@ -363,6 +378,23 @@
                         </select>
 
                     </div>
+
+                    <!-- LOCATION -->
+<div id="locationBox"
+     class="{{ old('role') === 'provider' ? '' : 'hidden' }}">
+
+    <label class="text-sm text-gray-300 block mb-2">
+        Location
+    </label>
+
+    <input type="text"
+           name="location"
+           value="{{ old('location') }}"
+           placeholder="Enter your location"
+
+           class="w-full bg-white/10 border border-white/10 text-white placeholder-gray-400 px-5 py-4 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-400 transition">
+
+</div>
 
                     <!-- CERTIFICATE -->
                     <div id="certificateBox"
@@ -503,6 +535,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const certificateBox =
         document.getElementById('certificateBox');
 
+    const locationBox =
+        document.getElementById('locationBox');
+
     function toggleFields() {
 
         const selectedRole =
@@ -512,11 +547,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
             serviceBox.classList.remove('hidden');
             certificateBox.classList.remove('hidden');
+            locationBox.classList.remove('hidden');
 
         } else {
 
             serviceBox.classList.add('hidden');
             certificateBox.classList.add('hidden');
+            locationBox.classList.add('hidden');
 
         }
 

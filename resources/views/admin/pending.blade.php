@@ -247,7 +247,35 @@
                                     </span>
 
                                 </div>
+<!-- MOBILE -->
+<div class="bg-black/20 border border-white/10 rounded-3xl p-5">
 
+    <p class="text-gray-400 text-sm mb-2">
+        Mobile Number
+    </p>
+
+    <h3 class="font-bold text-lg text-green-400">
+
+        📱 {{ $provider->mobile_number ?? 'Not provided' }}
+
+    </h3>
+
+</div>
+
+<!-- LOCATION -->
+<div class="bg-black/20 border border-white/10 rounded-3xl p-5">
+
+    <p class="text-gray-400 text-sm mb-2">
+        Location
+    </p>
+
+    <h3 class="font-bold text-lg text-indigo-300">
+
+        📍 {{ $provider->location ?? 'Not provided' }}
+
+    </h3>
+
+</div>
                                 <!-- CERT -->
                                 <div class="bg-black/20 border border-white/10 rounded-3xl p-5">
 

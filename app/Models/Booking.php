@@ -23,6 +23,8 @@ class Booking extends Model
     'payment_status',
     'gcash_proof',
     'payment_verified_at',
+    'customer_latitude',
+'customer_longitude',
         
     ];
   public function owner()

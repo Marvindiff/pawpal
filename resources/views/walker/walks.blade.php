@@ -106,7 +106,7 @@
     @endif
 
     <!-- 🔍 SORT BAR -->
-    <div class="flex flex-wrap gap-3 mb-8">
+    <div class="flex flex-wrap gap-3 mb-8 justify-center">
 
         <button onclick="sortWalks('newest')"
             class="bg-indigo-600 text-white px-5 py-3 rounded-2xl font-semibold shadow hover:bg-indigo-500 transition">
@@ -140,11 +140,13 @@
 
     <!-- 📦 WALKS -->
     <div id="walkContainer"
-         class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+         class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto">
 
         @forelse($walks as $walk)
 
-        <div class="walk-card bg-white rounded-3xl shadow-lg p-6 hover:shadow-2xl hover:-translate-y-1 transition duration-300"
+        <div onclick="window.location='{{ route('receipt.show', $walk->id) }}'"
+
+             class="walk-card w-full bg-white rounded-3xl shadow-lg p-6 hover:shadow-2xl hover:-translate-y-1 transition duration-300 cursor-pointer"
 
              data-date="{{ $walk->created_at }}"
              data-status="{{ $walk->status }}">
@@ -162,7 +164,9 @@
                     <p class="text-sm text-gray-500 mt-1">
                         📅 {{ $walk->schedule }}
                     </p>
-
+<p class="text-indigo-600 font-semibold mt-2">
+    📱 {{ $walk->user->mobile_number ?? 'No mobile number' }}
+</p>
                     <p class="text-green-600 font-bold mt-2">
                         💰 ₱{{ number_format($walk->price ?? 100, 2) }}
                     </p>
@@ -172,7 +176,6 @@
                 <!-- STATUS -->
                 <div class="flex flex-col items-end gap-2">
 
-                    <!-- BOOKING STATUS -->
                     <span class="px-4 py-1 rounded-full text-xs font-bold
 
                         @if($walk->status == 'pending')
@@ -195,7 +198,6 @@
 
                     </span>
 
-                    <!-- PAYMENT -->
                     @if($walk->payment_status == 'paid' || $walk->status == 'paid')
 
                         <span class="text-green-600 text-xs font-bold">
@@ -204,7 +206,6 @@
 
                     @endif
 
-                    <!-- REFUND -->
                     @if($walk->is_refunded)
 
                         <span class="text-blue-600 text-xs font-bold">
@@ -224,10 +225,14 @@
                 @if($walk->status == 'pending')
 
                     <form method="POST"
-                          action="{{ route('walker.walks.approve', $walk->id) }}">
+                          action="{{ route('walker.walks.approve', $walk->id) }}"
+                          onclick="event.stopPropagation()">
+
                         @csrf
 
                         <button
+                            onclick="event.stopPropagation()"
+
                             class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-2xl text-sm font-semibold transition shadow">
 
                             ✅ Approve
@@ -242,11 +247,13 @@
                 @if($walk->status == 'pending' || $walk->status == 'approved')
 
                     <form method="POST"
-                          action="{{ route('walker.walks.reject', $walk->id) }}">
+                          action="{{ route('walker.walks.reject', $walk->id) }}"
+                          onclick="event.stopPropagation()">
+
                         @csrf
 
                         <button
-                            onclick="return confirm('Reject this booking?')"
+                            onclick="event.stopPropagation(); return confirm('Reject this booking?')"
 
                             class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-2xl text-sm font-semibold transition shadow">
 
@@ -265,10 +272,14 @@
                 )
 
                     <form method="POST"
-                          action="{{ route('walker.walks.complete', $walk->id) }}">
+                          action="{{ route('walker.walks.complete', $walk->id) }}"
+                          onclick="event.stopPropagation()">
+
                         @csrf
 
                         <button
+                            onclick="event.stopPropagation()"
+
                             class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-2xl text-sm font-semibold transition shadow">
 
                             🏁 Complete
@@ -281,8 +292,26 @@
 
             </div>
 
+            <!-- 📍 VIEW PET OWNER LOCATION -->
+            @if(true)
+
+            <a target="_blank"
+               href="https://www.google.com/maps?q={{ $walk->customer_latitude }},{{ $walk->customer_longitude }}"
+
+               onclick="event.stopPropagation()"
+
+               class="mt-4 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-500 text-white py-3 rounded-2xl font-semibold transition shadow">
+
+                📍 View Pet Owner Location
+
+            </a>
+
+            @endif
+
             <!-- MESSAGE -->
             <a href="{{ route('chat.index', $walk->user_id) }}"
+               onclick="event.stopPropagation()"
+
                class="mt-5 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-2xl font-semibold transition shadow">
 
                 💬 Message Owner
@@ -402,7 +431,6 @@ toggleBtn.addEventListener('click', () => {
 
     if (dashboard.classList.contains('from-gray-950')) {
 
-        // ☀️ LIGHT
         dashboard.classList.remove(
             'from-gray-950',
             'via-slate-900',
@@ -422,7 +450,6 @@ toggleBtn.addEventListener('click', () => {
 
     } else {
 
-        // 🌙 DARK
         dashboard.classList.remove(
             'from-indigo-50',
             'via-purple-50',

@@ -38,16 +38,21 @@ public function reports()
         return view('provider.dashboard', compact('provider', 'bookings', 'unreadCount'));
     }
 
-    public function toggleAvailability(Request $request)
-    {
-        $provider = Auth::user();
+   public function toggleAvailability(Request $request)
+{
+    $provider = Auth::user();
 
-        $provider->is_available = $request->is_available;
-        $provider->save();
+    // 🔥 FORCE BOOLEAN VALUE
+    $provider->is_available =
+        $request->has('is_available') ? 1 : 0;
 
-        return redirect()->back()->with('success', 'Availability updated!');
-    }
+    $provider->save();
 
+    return redirect()->back()->with(
+        'success',
+        'Availability updated!'
+    );
+}
     public function services()
     {
         $provider = auth()->user();

@@ -160,9 +160,14 @@ use App\Models\Review;
             </p>
 
             <!-- LOCATION -->
-            <p class="provider-location text-sm text-gray-500 mb-4">
-                📍 {{ $provider->location ?? 'Location not set' }}
-            </p>
+<p class="provider-location text-sm text-gray-500 mb-2">
+    📍 {{ $provider->location ?? 'Location not set' }}
+</p>
+
+<!-- MOBILE -->
+<p class="text-sm text-indigo-600 font-semibold mb-4">
+    📱 {{ $provider->mobile_number ?? 'No mobile number' }}
+</p>
 
             <!-- 💬 CHAT -->
             <a href="{{ route('chat.index', $provider->id) }}"
@@ -174,26 +179,54 @@ use App\Models\Review;
             @if($provider->price)
 
                 <form method="POST" action="{{ route('booking.store') }}">
-                    @csrf
+    @csrf
 
-                    <input type="hidden" name="provider_id" value="{{ $provider->id }}">
-                    <input type="hidden" name="price" value="{{ $provider->price }}">
+    <!-- PROVIDER -->
+    <input type="hidden" name="provider_id" value="{{ $provider->id }}">
+    <input type="hidden" name="price" value="{{ $provider->price }}">
 
-                    <input type="date"
-                           name="date"
-                           required
-                           class="border border-gray-200 p-3 w-full rounded-2xl mb-3 focus:ring-2 focus:ring-indigo-400 outline-none">
+    <!-- 📍 CUSTOMER GPS -->
+    <input type="hidden"
+           name="customer_latitude"
+           id="customer_latitude">
 
-                    <input type="time"
-                           name="time"
-                           required
-                           class="border border-gray-200 p-3 w-full rounded-2xl mb-3 focus:ring-2 focus:ring-indigo-400 outline-none">
+    <input type="hidden"
+           name="customer_longitude"
+           id="customer_longitude">
 
-                    <button class="w-full bg-yellow-400 hover:bg-yellow-300 text-gray-900 py-3 rounded-2xl font-bold transition">
-                        Book Now
-                    </button>
+    <!-- DATE -->
+    <input type="date"
+           name="date"
+           required
+           class="border border-gray-200 p-3 w-full rounded-2xl mb-3 focus:ring-2 focus:ring-indigo-400 outline-none">
 
-                </form>
+    <!-- TIME -->
+    <input type="time"
+           name="time"
+           required
+           class="border border-gray-200 p-3 w-full rounded-2xl mb-3 focus:ring-2 focus:ring-indigo-400 outline-none">
+
+    <!-- 📍 LOCATION BUTTON -->
+   <button type="button"
+        onclick="getLocation()"
+
+        class="w-full bg-green-600 hover:bg-green-500 text-white py-3 rounded-2xl font-semibold transition mb-3">
+
+    📍 Use Current Location
+
+</button>
+
+<p id="gpsStatus"
+   class="text-sm text-green-600 mt-2 text-center"></p>
+
+    <!-- SUBMIT -->
+    <button class="w-full bg-yellow-400 hover:bg-yellow-300 text-gray-900 py-3 rounded-2xl font-bold transition">
+
+        Book Now
+
+    </button>
+
+</form>
 
             @else
 
@@ -332,5 +365,74 @@ toggleBtn.addEventListener('click', () => {
 });
 
 </script>
+<script>
 
+function getLocation(){
+
+    if (!navigator.geolocation) {
+
+        alert('❌ GPS is not supported.');
+
+        return;
+
+    }
+
+    navigator.geolocation.getCurrentPosition(
+
+        (position) => {
+
+            // 📍 SAVE GPS
+            document.getElementById('customer_latitude').value =
+                position.coords.latitude;
+
+            document.getElementById('customer_longitude').value =
+                position.coords.longitude;
+
+            // 🎯 ACCURACY
+            const accuracy =
+                Math.round(position.coords.accuracy);
+
+            // ✅ SUCCESS
+            document.getElementById('gpsStatus').innerHTML =
+
+                `📍 Accurate GPS locked (${accuracy}m accuracy)`;
+
+            console.log(
+                'LAT:',
+                position.coords.latitude
+            );
+
+            console.log(
+                'LONG:',
+                position.coords.longitude
+            );
+
+            console.log(
+                'ACCURACY:',
+                accuracy
+            );
+
+        },
+
+        (error) => {
+
+            alert(
+                '❌ Unable to get accurate GPS location.'
+            );
+
+            console.log(error);
+
+        },
+
+        {
+            enableHighAccuracy: true,
+            timeout: 30000,
+            maximumAge: 0
+        }
+
+    );
+
+}
+
+</script>
 @endsection

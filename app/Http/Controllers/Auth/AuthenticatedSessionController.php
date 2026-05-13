@@ -41,12 +41,17 @@ class AuthenticatedSessionController extends Controller
         ])->withInput();
     }
 
-    // 🚫 BLOCK PROVIDER IF PENDING
-    if ($user->role === 'provider' && $user->status === 'pending') {
-        return back()->withErrors([
-            'email' => '⏳ Your account is still waiting for admin approval.'
-        ])->withInput();
-    }
+    // 🚫 BLOCK PROVIDER IF NOT APPROVED
+if ($user->role === 'provider' && $user->status !== 'approved') {
+
+    return back()->withErrors([
+
+        'email' =>
+        '⏳ Your account is still waiting for admin approval.'
+
+    ])->withInput();
+
+}
 
     // 🚫 BLOCK NON-ADMIN ON ADMIN LOGIN
     if ($request->is('admin/*') && $user->role !== 'admin') {
@@ -82,19 +87,26 @@ class AuthenticatedSessionController extends Controller
         return redirect('/admin/dashboard')->with('warning', $warning);
     }
 
-    // 🐾 PROVIDER
-    if ($user->role === 'provider') {
+  // 🐾 PROVIDER
+if ($user->role === 'provider') {
 
-        if ($user->service_type === 'walker') {
-            return redirect()->route('walker.dashboard')->with('warning', $warning);
-        }
+    // 🚶 WALKER
+    if ($user->service_type === 'walker') {
 
-        if ($user->service_type === 'sitter') {
-            return redirect()->route('provider.dashboard')->with('warning', $warning);
-        }
+        return redirect('/walker/dashboard')
+            ->with('warning', $warning);
 
-        return redirect('/provider/dashboard')->with('warning', $warning);
     }
+
+    // 🐾 SITTER
+    if ($user->service_type === 'sitter') {
+
+        return redirect('/provider/dashboard')
+            ->with('warning', $warning);
+
+    }
+
+}
 
     // 👤 USER
     return redirect('/dashboard')->with('warning', $warning);

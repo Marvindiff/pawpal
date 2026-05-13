@@ -48,17 +48,24 @@ class BookingController extends Controller
 
         $schedule = $request->date . ' ' . $request->time;
 
-        Booking::create([
-            'user_id' => auth()->id(),
-            'provider_id' => $provider->id,
-            'schedule' => $schedule,
+       Booking::create([
 
-            // ✅ FIX HERE (IMPORTANT)
-            'price' => $provider->price,
+    'user_id' => auth()->id(),
 
-            'status' => 'pending'
-        ]);
+    'provider_id' => $provider->id,
 
+    'schedule' => $schedule,
+
+    'price' => $provider->price,
+
+    'status' => 'pending',
+
+    // 📍 CUSTOMER LOCATION
+    'customer_latitude' => $request->customer_latitude,
+
+    'customer_longitude' => $request->customer_longitude
+
+]);
         return back()->with('success', 'Booking sent!');
     }
 
