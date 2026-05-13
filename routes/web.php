@@ -23,11 +23,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\TrackingController;
 
 Route::get('/', function () {
-    return 'PawPal is working!';
-});
-
-Route::get('/', function () {
-    return view('welcome');
+    return 'PawPal Railway Deployment Success!';
 });
 
 Route::get('/wallet/add', [WalletController::class, 'showAddFunds'])
