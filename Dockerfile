@@ -10,14 +10,14 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 
+COPY package*.json ./
+
+RUN npm install
+
 COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
 
-# Install frontend dependencies
-RUN npm install
-
-# Build Vite assets
 RUN npm run build
 
 RUN chmod -R 775 storage bootstrap/cache
