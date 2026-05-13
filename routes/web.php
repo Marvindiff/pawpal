@@ -34,6 +34,17 @@ Route::get('/clear-cache', function () {
 
 });
 
+Route::get('/db-test', function () {
+
+    return [
+        'host' => env('DB_HOST'),
+        'database' => env('DB_DATABASE'),
+        'username' => env('DB_USERNAME'),
+        'password_exists' => env('DB_PASSWORD') ? 'YES' : 'NO',
+    ];
+
+});
+
 Route::get('/', function () {
     return 'PawPal Railway Deployment Success!';
 });
