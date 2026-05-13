@@ -21,6 +21,18 @@ use App\Http\Controllers\WalletController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\TrackingController;
+use Illuminate\Support\Facades\Artisan;
+
+Route::get('/clear-cache', function () {
+
+    Artisan::call('config:clear');
+    Artisan::call('cache:clear');
+    Artisan::call('optimize:clear');
+    Artisan::call('config:cache');
+
+    return 'Laravel Cache Cleared';
+
+});
 
 Route::get('/', function () {
     return 'PawPal Railway Deployment Success!';
