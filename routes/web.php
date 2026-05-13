@@ -22,6 +22,10 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\TrackingController;
 
+Route::get('/', function () {
+    return view('welcome');
+});
+
 Route::get('/wallet/add', [WalletController::class, 'showAddFunds'])
     ->name('wallet.add.form');
 
