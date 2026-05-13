@@ -1,7 +1,8 @@
 FROM php:8.2-cli
 
 RUN apt-get update && apt-get install -y \
-    git unzip curl libpng-dev libonig-dev libxml2-dev libzip-dev zip
+    git unzip curl nodejs npm \
+    libpng-dev libonig-dev libxml2-dev libzip-dev zip
 
 RUN docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd zip
 
@@ -12,6 +13,12 @@ WORKDIR /app
 COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
+
+# Install frontend dependencies
+RUN npm install
+
+# Build Vite assets
+RUN npm run build
 
 RUN chmod -R 775 storage bootstrap/cache
 
