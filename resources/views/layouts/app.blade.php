@@ -5,7 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PawPal Dashboard</title>
 
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
 </head>
 
 <body class="font-sans antialiased bg-gradient-to-br from-indigo-200 via-purple-200 to-pink-200 min-h-screen">
